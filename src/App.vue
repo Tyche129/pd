@@ -266,6 +266,13 @@ onMounted(() => {
   
   setTimeout(syncScroll, 100)
 })
+window.addEventListener('keydown', function (e) {
+    // 检查是否按下了 Ctrl 键（或 Mac 的 Command 键）以及 S 键
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        // 阻止浏览器默认的保存行为
+        e.preventDefault();
+    }
+});
 </script>
 
 <template>
@@ -327,11 +334,29 @@ onMounted(() => {
     <main>
       <div class="workspace-card">
         <div class="edit-toolbar">
+          <button class="tool-btn" title="标题" @click="insertText('### ', '')"><i class="fas fa-heading"></i></button>
           <button class="tool-btn" title="粗体" @click="insertText('**','**')"><i class="fas fa-bold"></i></button>
           <button class="tool-btn" title="斜体" @click="insertText('*','*')"><i class="fas fa-italic"></i></button>
           <button class="tool-btn" title="居中" @click="insertText('<center>', '</center>')"><i class="fas fa-align-center"></i></button>
           <button class="tool-btn" title="代码块" @click="insertText('```\n','\n```')"><i class="fas fa-code"></i></button>
           <button class="tool-btn" title="链接" @click="insertText('[', '](https://)')"><i class="fas fa-link"></i></button>
+          <button class="tool-btn" title="引用" @click="insertText('> ', '')"><i class="fas fa-quote-left"></i></button>
+          <button class="tool-btn" title="无序列表" @click="insertText('* ', '')"><i class="fas fa-list-ul"></i></button>
+          <button class="tool-btn" title="有序列表" @click="insertText('1. ', '')"><i class="fas fa-list-ol"></i></button>
+          <button class="tool-btn" title="任务列表" @click="insertText('- [ ] ', '')"><i class="fas fa-tasks"></i></button>
+          <button class="tool-btn" title="图片" @click="insertText('![alt](', ')')"><i class="fas fa-image"></i></button>
+          <button class="tool-btn" title="行内代码" @click="insertText('`', '`')"><i class="fas fa-terminal"></i></button>
+          <button class="tool-btn" title="分割线" @click="insertText('\n---\n', '')"><i class="fas fa-minus"></i></button>
+          <button class="tool-btn" title="表格" @click="insertText('| 表头1 | 表头2 |\n| --- | --- |\n| 单元格 | 单元格 |\n', '')"><i class="fas fa-table"></i></button>
+          <button class="tool-btn" title="上标" @click="insertText('^', '^')"><i class="fas fa-superscript"></i></button>
+          <button class="tool-btn" title="下标" @click="insertText('~', '~')"><i class="fas fa-subscript"></i></button>
+          <button class="tool-btn" title="高亮" @click="insertText('==', '==')"><i class="fas fa-highlighter"></i></button>
+          <button class="tool-btn" title="下划线" @click="insertText('<u>', '</u>')"><i class="fas fa-underline"></i></button>
+          <button class="tool-btn" title="脚注" @click="insertText('[^1]', '\n\n[^1]: 这里是注解内容')"><i class="fas fa-sticky-note"></i></button>
+          <button class="tool-btn" title="行内公式" @click="insertText('$', '$')"><i class="fas fa-percentage"></i></button>
+          <button class="tool-btn" title="公式块" @click="insertText('$$\n', '\n$$')"><i class="fas fa-calculator"></i></button>
+          <button class="tool-btn" title="折叠面板" @click="insertText('<details>\n<summary>点击展开查看更多</summary>\n\n', '\n\n</details>')"><i class="fas fa-chevron-down"></i></button>
+          <button class="tool-btn" title="提示框" @click="insertText('> [!NOTE]\n> ', '')"><i class="fas fa-info-circle"></i></button>
           <div style="flex:1"></div>
           <div class="save-status">{{ saveStatus }}</div>
         </div>
