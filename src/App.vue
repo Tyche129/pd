@@ -321,7 +321,10 @@ window.addEventListener('keydown', function (e) {
 
       <input type="file" id="fileInput" accept=".md, .txt, .markdown" style="display:none" @change="importFile">
       <div class="footer-meta">
-        <div>字数: {{ wordCount }}</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <span>字数: {{ wordCount }}</span>
+        <a style="color: gainsboro; text-decoration: none;" href="https://github.com/Tyche129/pd">Github</a>
+      </div>
       </div>
     </aside>
 
