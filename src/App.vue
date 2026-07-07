@@ -10,7 +10,6 @@ marked.use({
     {
       name: 'code',
       renderer(token) {
-        // 这里的 token 包含了 code 和 lang
         const lang = token.lang || 'plaintext'
         const validLanguage = hljs.getLanguage(lang) ? lang : 'plaintext'
         const highlighted = hljs.highlight(token.text, { language: validLanguage }).value
@@ -30,6 +29,9 @@ const currentDocName = ref('未命名文档')
 const mdLinkInput = ref('')
 const isPreviewOnly = ref(false)
 const saveStatus = ref('就绪')
+
+// 💡 控制分栏状态下的右侧预览显示/隐藏 (默认显示)
+const showPreview = ref(true)
 
 // 💡 状态控制锁：默认禁止编辑时触发新建历史条目
 const allowCreateHistory = ref(false)
@@ -61,7 +63,9 @@ const triggerRender = () => {
 
 // 滚动同步
 const syncScroll = () => {
-  if (isPreviewOnly.value || !editorRef.value || !previewContainerRef.value) return
+  // 💡 核心修复：如果处于纯预览模式、或者隐藏了右侧预览、或者 DOM 未加载，直接拦截返回，不作任何滚动干涉
+  if (isPreviewOnly.value || !showPreview.value || !editorRef.value || !previewContainerRef.value) return
+  
   const editor = editorRef.value
   const preview = previewContainerRef.value
   
@@ -81,17 +85,14 @@ watch(editorContent, (newContent) => {
     if (!newContent || !newContent.trim()) return
 
     if (currentDocId.value) {
-      // 1. 如果已经打开或绑定了某篇历史文件，只进行原地覆盖更新
       addToHistory(newContent, currentDocName.value, currentDocId.value)
     } else if (allowCreateHistory.value && newContent.trim().length > 10) {
-      // 2. 只有当明确点了“新建文件”解开锁之后，才允许在这里唯一一次创建新文件条目
       const title = generateDefaultTitle(newContent)
       const savedId = addToHistory(newContent, title, null)
       if (savedId) {
         currentDocId.value = savedId
         currentDocName.value = title
       }
-      // 💡 创建完毕立刻上锁，接下来日常打字不再触发新建
       allowCreateHistory.value = false
     }
   }, 800)
@@ -105,10 +106,7 @@ const createNewFile = () => {
   editorContent.value = "# 崭新的文档 ✨\n\n在这里书写你的灵感..."
   currentDocId.value = null
   currentDocName.value = "未命名文档"
-  
-  // 💡 显式解锁：允许在接下来的输入中在历史记录列表中创建一条全新记录
   allowCreateHistory.value = true 
-  
   saveStatus.value = "已创建新文件"
   editorRef.value?.focus()
 }
@@ -131,7 +129,6 @@ const importFile = (event: Event) => {
     const fileName = file.name.replace(/\.md$|\.markdown$|\.txt$/i, '') || "导入文档"
     currentDocName.value = fileName
     
-    // 💡 明确行为：直接触发 Hook 创建全新历史，并把返回的 ID 直接绑定，随后锁死创建权限
     const savedId = addToHistory(content, fileName, null)
     currentDocId.value = savedId
     allowCreateHistory.value = false
@@ -166,7 +163,6 @@ const importFromLink = async () => {
     
     currentDocName.value = fileName
     
-    // 💡 明确行为：远端拉取成功，直接将其持久化为新历史卡片，绑定 ID 并上锁
     const savedId = addToHistory(text, fileName, null)
     currentDocId.value = savedId
     allowCreateHistory.value = false
@@ -188,9 +184,9 @@ const openHistoryDoc = (id: string) => {
     editorContent.value = item.content
     currentDocId.value = item.id
     currentDocName.value = item.name
-    allowCreateHistory.value = false // 既然是打开旧文件，当然禁止创建新条目
+    allowCreateHistory.value = false
     
-    addToHistory(item.content, item.name, item.id) // 刷新它在列表里的最后编辑时间
+    addToHistory(item.content, item.name, item.id)
     saveStatus.value = `已打开: ${item.name}`
     if (isPreviewOnly.value) isPreviewOnly.value = false
     editorRef.value?.focus()
@@ -258,20 +254,18 @@ const insertText = (before: string, after: string) => {
 // 初始化加载环境
 onMounted(() => {
   const saved = localStorage.getItem('pd_content_dark')
-  // 恢复草稿，此时属于常规页面刷新，不产生任何历史文件
   editorContent.value = saved || "# PD Pro\n\n在这里书写你的灵感..."
   currentDocId.value = null
   currentDocName.value = "未命名文档"
-  allowCreateHistory.value = false // 锁死
+  allowCreateHistory.value = false
   
   setTimeout(syncScroll, 100)
 })
+
 window.addEventListener('keydown', function (e) {
-    // 检查是否按下了 Ctrl 键（或 Mac 的 Command 键）以及 S 键
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-        // 阻止浏览器默认的保存行为
-        e.preventDefault();
-    }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+  }
 });
 </script>
 
@@ -332,7 +326,7 @@ window.addEventListener('keydown', function (e) {
     </aside>
 
     <main>
-      <div class="workspace-card">
+      <div class="workspace-card" :class="{ 'hide-preview': !showPreview }">
         <div class="edit-toolbar">
           <button class="tool-btn" title="标题" @click="insertText('### ', '')"><i class="fas fa-heading"></i></button>
           <button class="tool-btn" title="粗体" @click="insertText('**','**')"><i class="fas fa-bold"></i></button>
@@ -357,7 +351,17 @@ window.addEventListener('keydown', function (e) {
           <button class="tool-btn" title="公式块" @click="insertText('$$\n', '\n$$')"><i class="fas fa-calculator"></i></button>
           <button class="tool-btn" title="折叠面板" @click="insertText('<details>\n<summary>点击展开查看更多</summary>\n\n', '\n\n</details>')"><i class="fas fa-chevron-down"></i></button>
           <button class="tool-btn" title="提示框" @click="insertText('> [!NOTE]\n> ', '')"><i class="fas fa-info-circle"></i></button>
+          
           <div style="flex:1"></div>
+          
+          <button 
+            class="tool-btn toggle-preview-btn" 
+            :title="showPreview ? '隐藏预览' : '显示预览'" 
+            @click="showPreview = !showPreview"
+          >
+            <i :class="showPreview ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+          
           <div class="save-status">{{ saveStatus }}</div>
         </div>
         
@@ -370,7 +374,7 @@ window.addEventListener('keydown', function (e) {
             placeholder="在此输入 Markdown..."
             @scroll="syncScroll"
           ></textarea>
-          <div ref="previewContainerRef" class="preview-pane">
+          <div ref="previewContainerRef" class="preview-pane" v-show="showPreview">
             <article class="markdown-body markdown-dark" v-html="parsedHtml"></article>
           </div>
         </div>

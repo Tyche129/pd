@@ -318,3 +318,18 @@ main {
   #editor { border-right: none; border-bottom: 1px solid var(--border-color); } 
   aside { width: 260px; } 
 }
+/* ==========================================
+   7. 隐藏预览栏时的平滑切换与去除多余边框
+   ========================================== */
+.workspace-card.hide-preview #editor {
+  border-right: none; /* 隐藏右侧预览时，去除编辑器的右边框 */
+}
+
+.toggle-preview-btn {
+  margin-right: 5px;
+  transition: color 0.2s;
+}
+
+.toggle-preview-btn:hover {
+  color: var(--accent-color);
+}
