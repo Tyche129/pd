@@ -1,0 +1,320 @@
+/* ==========================================
+   1. 基础重置 & 全局布局
+   ========================================== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* 禁止浏览器最外层的滚动条 */
+  background-color: #010409; /* 匹配应用主背景色，防止闪白 */
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* ==========================================
+   2. 主应用变量与骨架
+   ========================================== */
+.app-container {
+  --sidebar-bg: #0f172a;
+  --accent-color: #6366f1;
+  --bg-color: #0d1117;
+  --main-bg: #010409;
+  --text-color: #c9d1d9;
+  --border-color: #30363d;
+  --tab-bg: #161b22;
+  --history-hover: #1e293b;
+
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--main-bg);
+  color: var(--text-color);
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ==========================================
+   3. 侧边栏样式 (Sidebar)
+   ========================================== */
+aside {
+  width: 280px; 
+  background: var(--sidebar-bg); 
+  color: white;
+  display: flex; 
+  flex-direction: column; 
+  padding: 20px 16px; 
+  z-index: 100;
+  border-right: 1px solid var(--border-color); 
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.brand {
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  font-weight: 700; 
+  font-size: 1.25rem; 
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #818cf8, #c084fc); 
+  -webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-btn {
+  width: 100%; 
+  background: rgba(255,255,255,0.05); 
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #e2e8f0; 
+  padding: 10px 12px; 
+  border-radius: 10px; 
+  display: flex; 
+  align-items: center; 
+  gap: 10px;
+  cursor: pointer; 
+  margin-bottom: 10px; 
+  font-size: 14px; 
+  transition: 0.2s; 
+  text-align: left;
+}
+.nav-btn:hover { 
+  background: var(--accent-color); 
+  color: white; 
+}
+
+/* 链接打开区域 */
+.import-link-area { 
+  margin-top: 12px; 
+  display: flex; 
+  gap: 6px; 
+}
+.link-input { 
+  flex: 1; 
+  background: #1e293b; 
+  border: 1px solid #334155; 
+  border-radius: 8px; 
+  padding: 8px; 
+  font-size: 12px; 
+  color: white; 
+  outline: none; 
+}
+.import-link-btn { 
+  background: var(--accent-color); 
+  border: none; 
+  padding: 6px 12px; 
+  border-radius: 8px; 
+  color: white; 
+  font-size: 12px; 
+  cursor: pointer; 
+}
+
+/* 历史记录 */
+.history-section { 
+  margin-top: 24px; 
+  border-top: 1px solid rgba(255,255,255,0.1); 
+  padding-top: 20px; 
+  flex: 1; 
+  overflow-y: auto; 
+}
+.history-title { 
+  font-size: 12px; 
+  text-transform: uppercase; 
+  color: #94a3b8; 
+  margin-bottom: 14px; 
+  display: flex; 
+  justify-content: space-between; 
+}
+.clear-history-btn { 
+  background: none; 
+  border: none; 
+  color: #ef4444; 
+  cursor: pointer; 
+  font-size: 12px; 
+}
+.history-list { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+}
+.history-item { 
+  background: rgba(255,255,255,0.03); 
+  border-radius: 10px; 
+  padding: 10px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  border: 1px solid transparent; 
+}
+.history-item:hover { 
+  background: var(--history-hover); 
+  border-color: var(--accent-color); 
+}
+.history-info { 
+  flex: 1; 
+  overflow: hidden; 
+}
+.history-name { 
+  font-size: 13px; 
+  color: #f1f5f9; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+}
+.history-meta { 
+  font-size: 10px; 
+  color: #64748b; 
+  margin-top: 4px; 
+  display: flex; 
+  gap: 8px; 
+}
+.history-actions { 
+  opacity: 0.3; 
+  transition: opacity 0.2s; 
+}
+.history-item:hover .history-actions { 
+  opacity: 1; 
+}
+.history-del { 
+  background: none; 
+  border: none; 
+  color: #f87171; 
+  cursor: pointer; 
+  padding: 4px; 
+}
+.empty-history { 
+  font-size: 12px; 
+  color: #475569; 
+  text-align: center; 
+  padding: 20px 0; 
+  font-style: italic; 
+}
+.footer-meta { 
+  margin-top: 16px; 
+  padding-top: 12px; 
+  border-top: 1px solid rgba(255,255,255,0.1); 
+  font-size: 12px; 
+  color: #64748b; 
+}
+
+/* ==========================================
+   4. 主工作区样式 (Workspace)
+   ========================================== */
+main { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  padding: 20px; 
+  gap: 15px; 
+  overflow: hidden; 
+  box-sizing: border-box;
+}
+.workspace-card { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  background: var(--bg-color); 
+  border-radius: 12px; 
+  overflow: hidden; 
+  border: 1px solid var(--border-color); 
+}
+.edit-toolbar { 
+  display: flex; 
+  gap: 5px; 
+  padding: 8px 15px; 
+  background: var(--tab-bg); 
+  border-bottom: 1px solid var(--border-color); 
+}
+.tool-btn { 
+  background: transparent; 
+  border: none; 
+  color: var(--text-color); 
+  width: 34px; 
+  height: 34px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+.tool-btn:hover { 
+  color: var(--accent-color); 
+  background: rgba(255,255,255,0.05); 
+}
+.save-status { 
+  font-size: 12px; 
+  color: #8b949e; 
+  align-self: center; 
+  margin-right: 10px; 
+}
+
+/* 编辑器与预览左右分栏 */
+.split-view { 
+  flex: 1; 
+  display: flex; 
+  overflow: hidden; 
+}
+#editor { 
+  flex: 1; 
+  border: none; 
+  padding: 30px; 
+  font-family: 'Fira Code', Consolas, Monaco, monospace; 
+  font-size: 14px; 
+  line-height: 1.7; 
+  outline: none; 
+  resize: none; 
+  background: transparent; 
+  color: var(--text-color); 
+  overflow-y: auto; 
+  border-right: 1px solid var(--border-color); 
+  box-sizing: border-box;
+}
+.preview-pane { 
+  flex: 1; 
+  padding: 30px; 
+  overflow-y: auto; 
+  background: transparent; 
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   5. 纯预览模式与特色样式
+   ========================================== */
+.app-container.preview-only aside { display: none; }
+.app-container.preview-only main { padding: 0; }
+.app-container.preview-only .workspace-card { border-radius: 0; border: none; }
+.app-container.preview-only #editor, 
+.app-container.preview-only .edit-toolbar { display: none; }
+.app-container.preview-only .preview-pane { max-width: 900px; margin: 0 auto; width: 100%; }
+
+#exitPreview { 
+  position: fixed; 
+  bottom: 30px; 
+  right: 30px; 
+  background: var(--accent-color); 
+  color: white; 
+  border: none; 
+  padding: 12px 20px; 
+  border-radius: 50px; 
+  cursor: pointer; 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+  z-index: 1000; 
+}
+
+/* 全局滚动条美化 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #ffffff22; border-radius: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ==========================================
+   6. 响应式布局自适应
+   ========================================== */
+@media (max-width: 900px) { 
+  .split-view { flex-direction: column; } 
+  #editor { border-right: none; border-bottom: 1px solid var(--border-color); } 
+  aside { width: 260px; } 
+}
