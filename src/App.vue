@@ -5,12 +5,20 @@ import hljs from 'highlight.js'
 import { useHistory } from './hooks/useHistory'
 
 // 初始化配置 Marked
-marked.setOptions({
-  highlight: (code, lang) => {
-    const language = hljs.getLanguage(lang) ? lang : 'plaintext'
-    return hljs.highlight(code, { language }).value
-  },
-  langPrefix: 'hljs language-',
+marked.use({
+  extensions: [
+    {
+      name: 'code',
+      renderer(token) {
+        // 这里的 token 包含了 code 和 lang
+        const lang = token.lang || 'plaintext'
+        const validLanguage = hljs.getLanguage(lang) ? lang : 'plaintext'
+        const highlighted = hljs.highlight(token.text, { language: validLanguage }).value
+        return `<pre><code class="hljs language-${validLanguage}">${highlighted}</code></pre>`
+      }
+    }
+  ],
+  async: false,
   breaks: true,
   gfm: true
 })
