@@ -287,7 +287,7 @@ window.addEventListener('keydown', function (e) {
         <i class="fas fa-download"></i><span>导出 .html</span>
       </button>
       <button class="nav-btn" @click="isPreviewOnly = !isPreviewOnly">
-        <i class="fas fa-eye"></i><span>预览模式</span>
+        <i class="fas fa-eye"></i><span>全屏预览</span>
       </button>
 
       <div class="import-link-area">
