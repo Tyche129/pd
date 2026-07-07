@@ -377,7 +377,7 @@ window.addEventListener('keydown', function (e) {
             placeholder="在此输入 Markdown..."
             @scroll="syncScroll"
           ></textarea>
-          <div ref="previewContainerRef" class="preview-pane" v-show="showPreview">
+          <div ref="previewContainerRef" class="preview-pane" v-show="showPreview || isPreviewOnly">
             <article class="markdown-body markdown-dark" v-html="parsedHtml"></article>
           </div>
         </div>
