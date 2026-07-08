@@ -76,6 +76,7 @@ const syncScroll = () => {
 }
 
 // 监听编辑器输入（防抖）
+// 监听编辑器输入（防抖）
 let historyDebounce: NodeJS.Timeout | null = null
 watch(editorContent, (newContent) => {
   triggerRender() // 无论什么时候打字，都会自动更新网页草稿缓存
@@ -84,14 +85,19 @@ watch(editorContent, (newContent) => {
   historyDebounce = setTimeout(() => {
     if (!newContent || !newContent.trim()) return
 
+    // 💡 实时根据当前最新内容的第一行生成标题
+    const nextTitle = generateDefaultTitle(newContent)
+
     if (currentDocId.value) {
-      addToHistory(newContent, currentDocName.value, currentDocId.value)
+      // 如果当前是已有文档，把最新的标题同步传给 history
+      currentDocName.value = nextTitle
+      addToHistory(newContent, nextTitle, currentDocId.value)
     } else if (allowCreateHistory.value && newContent.trim().length > 10) {
-      const title = generateDefaultTitle(newContent)
-      const savedId = addToHistory(newContent, title, null)
+      // 如果是全新创建的文档
+      const savedId = addToHistory(newContent, nextTitle, null)
       if (savedId) {
         currentDocId.value = savedId
-        currentDocName.value = title
+        currentDocName.value = nextTitle
       }
       allowCreateHistory.value = false
     }
@@ -101,7 +107,7 @@ watch(editorContent, (newContent) => {
 // 功能操作：新建文件
 const createNewFile = () => {
   if (editorContent.value.trim().length > 0) {
-    if (!confirm("新建文件会丢失当前未保存的内容，确定继续吗？")) return
+    if (!confirm("新建文件可能会丢失当前未保存的内容，确定继续吗？")) return
   }
   editorContent.value = "# 崭新的文档 ✨\n\n在这里书写你的灵感..."
   currentDocId.value = null
