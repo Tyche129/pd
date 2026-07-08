@@ -225,6 +225,10 @@ const handleClearAllHistory = () => {
 
 // 导出 Markdown 文件
 const exportFile = () => {
+  if (currentDocName.value === "未命名文档" && editorContent.value.trim()) {
+    currentDocName.value = generateDefaultTitle(editorContent.value)
+  }
+
   const blob = new Blob([editorContent.value], { type: 'text/markdown' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
@@ -235,11 +239,15 @@ const exportFile = () => {
 
 // 导出 HTML
 const exportHTML = () => {
+  if (currentDocName.value === "未命名文档" && editorContent.value.trim()) {
+    currentDocName.value = generateDefaultTitle(editorContent.value)
+  }
+
   const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Exported HTML</title></head><body>${parsedHtml.value}</body></html>`
   const blob = new Blob([fullHTML], { type: "text/html" })
   const link = document.createElement("a")
   link.href = URL.createObjectURL(blob)
-  link.download = "export.html"
+  link.download = currentDocName.value !== "未命名文档" ? `${currentDocName.value}.html` : `PD_${Date.now()}.html`
   link.click()
   URL.revokeObjectURL(link.href)
 }
