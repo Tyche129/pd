@@ -77,7 +77,6 @@ const syncScroll = () => {
 }
 
 // 监听编辑器输入（防抖）
-// 监听编辑器输入（防抖）
 let historyDebounce: NodeJS.Timeout | null = null
 watch(editorContent, (newContent) => {
   triggerRender() // 无论什么时候打字，都会自动更新网页草稿缓存
@@ -153,8 +152,11 @@ const importFromLink = async () => {
     alert("请输入有效的链接地址")
     return
   }
+  // 针对标准的 GitHub 链接进行精准转换
   if (url.includes('github.com') && url.includes('/blob/')) {
-    url = url.replace('/blob/', '/raw/')
+    url = url
+      .replace('github.com', 'raw.githubusercontent.com')
+      .replace('/blob/', '/');
   }
   saveStatus.value = "正在加载远程文档..."
   try {
