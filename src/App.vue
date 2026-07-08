@@ -48,7 +48,8 @@ const parsedHtml = computed(() => marked.parse(editorContent.value))
 
 // 自动生成标题逻辑
 const generateDefaultTitle = (content: string) => {
-  const firstLine = content.split('\n')[0].replace(/^#+/, '').trim()
+  // 找到第一行，去掉前导的 # 号、列表符号以及前后的空格
+  const firstLine = content.split('\n')[0].replace(/^#+\s*/, '').replace(/^-\s+|^[0-9]+\.\s+/, '').trim()
   if (firstLine.length > 0 && firstLine.length < 40) return firstLine
   return `笔记_${new Date().toLocaleDateString()}`
 }
