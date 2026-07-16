@@ -30,10 +30,10 @@ const mdLinkInput = ref('')
 const isPreviewOnly = ref(false)
 const saveStatus = ref('就绪')
 
-// 💡 控制分栏状态下的右侧预览显示/隐藏 (默认显示)
+// 控制分栏状态下的右侧预览显示/隐藏 (默认显示)
 const showPreview = ref(true)
 
-// 💡 状态控制锁：默认禁止编辑时触发新建历史条目
+// 状态控制锁：默认禁止编辑时触发新建历史条目
 const allowCreateHistory = ref(false)
 
 const editorRef = ref<HTMLTextAreaElement | null>(null)
@@ -64,12 +64,11 @@ const triggerRender = () => {
 
 // 滚动同步
 const syncScroll = () => {
-  // 💡 核心修复：如果处于纯预览模式、或者隐藏了右侧预览、或者 DOM 未加载，直接拦截返回，不作任何滚动干涉
   if (isPreviewOnly.value || !showPreview.value || !editorRef.value || !previewContainerRef.value) return
-  
+
   const editor = editorRef.value
   const preview = previewContainerRef.value
-  
+
   if (!editor.scrollHeight || editor.clientHeight === 0) return
   const scrollRatio = editor.scrollTop / (editor.scrollHeight - editor.clientHeight)
   const destScrollTop = scrollRatio * (preview.scrollHeight - preview.clientHeight)
@@ -80,12 +79,12 @@ const syncScroll = () => {
 let historyDebounce: NodeJS.Timeout | null = null
 watch(editorContent, (newContent) => {
   triggerRender() // 无论什么时候打字，都会自动更新网页草稿缓存
-  
+
   if (historyDebounce) clearTimeout(historyDebounce)
   historyDebounce = setTimeout(() => {
     if (!newContent || !newContent.trim()) return
 
-    // 💡 实时根据当前最新内容的第一行生成标题
+    // 实时根据当前最新内容的第一行生成标题
     const nextTitle = generateDefaultTitle(newContent)
 
     if (currentDocId.value) {
@@ -93,7 +92,7 @@ watch(editorContent, (newContent) => {
       currentDocName.value = nextTitle
       addToHistory(newContent, nextTitle, currentDocId.value)
     } else if (allowCreateHistory.value && newContent.trim().length > 10) {
-      // 如果是全新创建的文档
+      // 如果是全新创建的文档，第一次达到字数触发新建
       const savedId = addToHistory(newContent, nextTitle, null)
       if (savedId) {
         currentDocId.value = savedId
@@ -112,7 +111,7 @@ const createNewFile = () => {
   editorContent.value = "# 崭新的文档 ✨\n\n在这里书写你的灵感..."
   currentDocId.value = null
   currentDocName.value = "未命名文档"
-  allowCreateHistory.value = true 
+  allowCreateHistory.value = true
   saveStatus.value = "已创建新文件"
   editorRef.value?.focus()
 }
@@ -127,22 +126,22 @@ const importFile = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
-  
+
   const reader = new FileReader()
   reader.onload = (ev) => {
     const content = ev.target?.result as string
     editorContent.value = content
     const fileName = file.name.replace(/\.md$|\.markdown$|\.txt$/i, '') || "导入文档"
     currentDocName.value = fileName
-    
+
     const savedId = addToHistory(content, fileName, null)
     currentDocId.value = savedId
     allowCreateHistory.value = false
-    
+
     saveStatus.value = `已导入: ${file.name}`
   }
   reader.readAsText(file, 'UTF-8')
-  target.value = '' 
+  target.value = ''
 }
 
 // 功能操作：从链接导入远程文件
@@ -163,19 +162,19 @@ const importFromLink = async () => {
     const response = await fetch(url, { cache: "no-cache" })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const text = await response.text()
-    
+
     editorContent.value = text
     let fileName = "远程文档"
     const urlParts = url.split('/')
     const lastPart = urlParts.pop() || "document"
     fileName = lastPart.endsWith('.md') ? lastPart.slice(0, -3) : lastPart.substring(0, 30)
-    
+
     currentDocName.value = fileName
-    
+
     const savedId = addToHistory(text, fileName, null)
     currentDocId.value = savedId
     allowCreateHistory.value = false
-    
+
     saveStatus.value = `已打开链接: ${fileName}`
     mdLinkInput.value = ''
     if (isPreviewOnly.value) isPreviewOnly.value = false
@@ -194,7 +193,7 @@ const openHistoryDoc = (id: string) => {
     currentDocId.value = item.id
     currentDocName.value = item.name
     allowCreateHistory.value = false
-    
+
     addToHistory(item.content, item.name, item.id)
     saveStatus.value = `已打开: ${item.name}`
     if (isPreviewOnly.value) isPreviewOnly.value = false
@@ -259,9 +258,9 @@ const insertText = (before: string, after: string) => {
   const start = textarea.selectionStart
   const end = textarea.selectionEnd
   const val = editorContent.value
-  
+
   editorContent.value = val.substring(0, start) + before + val.substring(start, end) + after + val.substring(end)
-  
+
   setTimeout(() => {
     textarea.focus()
     textarea.setSelectionRange(start + before.length, end + before.length)
@@ -275,7 +274,7 @@ onMounted(() => {
   currentDocId.value = null
   currentDocName.value = "未命名文档"
   allowCreateHistory.value = false
-  
+
   setTimeout(syncScroll, 100)
 })
 
@@ -319,7 +318,7 @@ window.addEventListener('keydown', function (e) {
         </div>
         <div class="history-list">
           <div v-if="!historyList.length" class="empty-history">暂无历史记录</div>
-          <div v-for="item in historyList" :key="item.id" class="history-item">
+          <div v-for="item in historyList" :key="item.id" class="history-item" :class="{ 'active': currentDocId === item.id }">
             <div class="history-info" @click="openHistoryDoc(item.id)">
               <div class="history-name" :title="item.name">
                 📄 {{ item.name.length > 24 ? item.name.slice(0, 24) + '...' : item.name }}
@@ -338,10 +337,10 @@ window.addEventListener('keydown', function (e) {
 
       <input type="file" id="fileInput" accept=".md, .txt, .markdown" style="display:none" @change="importFile">
       <div class="footer-meta">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <span>字数: {{ wordCount }}</span>
-        <a style="color: gainsboro; text-decoration: none;" href="https://github.com/Tyche129/pd">Github</a>
-      </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <span>字数: {{ wordCount }}</span>
+          <a style="color: gainsboro; text-decoration: none;" href="https://github.com/Tyche129/pd">Github</a>
+        </div>
       </div>
     </aside>
 
