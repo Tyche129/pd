@@ -9,18 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.5.1",
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "github-markdown-css": "^5.9.0",
     "highlight.js": "^11.9.0",
     "marked": "^11.1.1",
-    "vue": "^3.4.15"
+    "vue": "^3.5.39"
   },
   "devDependencies": {
     "@types/marked": "^5.0.2",
-    "@types/node": "^20.11.10",
+    "@types/node": "^20.19.43",
     "@vitejs/plugin-vue": "^5.2.4",
-    "typescript": "^5.3.3",
+    "typescript": "^5.9.3",
     "vite": "^6.0.0",
-    "vue-tsc": "^2.0.0"
+    "vue-tsc": "^2.1.2"
   }
 }
